@@ -12,6 +12,7 @@ api = Blueprint('api', __name__)
 CORS(api)
 
 
+
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
 
@@ -20,3 +21,4 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
