@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { Context } from "../store/appContext";
 
 const LoginForm = () => {
 	const { store, actions } = useContext(Context);
@@ -20,6 +21,7 @@ const LoginForm = () => {
 			const userToken = await response.json();
 			localStorage.setItem("access", JSON.stringify(userToken));
 			await setStore({ access });
+			/* authentication() */
 		} catch (error) {
 			console.error(error);
 		}
@@ -31,24 +33,24 @@ const LoginForm = () => {
 				method: "GET",
 				headers: { "Authorization": "Bearer" + `${JSON.parse(localStorage.getItem("access"))}` }
 			});
+			const data = await response.json();
+			authorizerUser = data.logged_in_as;
+			/* navigate(`/private`) */
         } catch (error) {
 			console.error(error);
 		}
-        const data = await response.json();
+        /* const data = await response.json();
 		authorizerUser = data.logged_in_as;
-		navigate(`/private`)
+		navigate(`/private`) */
     }
 
-    useEffect(()=> {
-        authentication();
-    },[store.access])
 
 		return (
 			<>
 				<h1>Awesome Aplication</h1>
-				<form onSubmit={login}>
+				<form /* onSubmit={login} */>
 					<div className="row mb-3">
-						<label for="inputEmail3" className="col-sm-2 col-form-label">Email</label>
+						<label htmlFor="inputEmail3" className="col-sm-2 col-form-label">Email</label>
 						<div className="col-sm-10">
 							<input
 								onChange={(e) => { setUser({ ...user, email: e.target.value }) }}
@@ -58,7 +60,7 @@ const LoginForm = () => {
 						</div>
 					</div>
 					<div className="row mb-3">
-						<label for="inputPassword3" className="col-sm-2 col-form-label">Password</label>
+						<label htmlFor="inputPassword3" className="col-sm-2 col-form-label">Password</label>
 						<div className="col-sm-10">
 							<input
 								onChange={(e) => { setUser({ ...user, password: e.target.value }) }}
@@ -67,8 +69,9 @@ const LoginForm = () => {
 								id="inputPassword3" />
 						</div>
 					</div>
-					<button type="submit" className="btn btn-primary">Login</button>
+					{/* <button type="submit" className="btn btn-primary">Login</button> */}
 				</form>
+				<button onClick={login}>Login de verdad</button>
 			</>
 		)
 	}
