@@ -12,6 +12,7 @@ const LoginForm = () => {
 	})
 
 	const login = async () => {
+		/* const store = setStore(); */
 		try {
 			const response = await fetch("https://cuddly-telegram-69945q6vw9j6h4gr-3001.app.github.dev/login", {
 				method: "POST",
@@ -20,28 +21,26 @@ const LoginForm = () => {
 			});
 			const userToken = await response.json();
 			localStorage.setItem("access", JSON.stringify(userToken));
-			await setStore({ access });
-			/* authentication() */
+			authentication()
 		} catch (error) {
 			console.error(error);
 		}
 	}
 
 	const authentication = async () => {
+		const token = JSON.parse(localStorage.getItem("access"))
+		const access_key = token.access_token
         try {
-            const response = await fetch("https://cuddly-telegram-69945q6vw9j6h4gr-3001.app.github.dev/private", {
+            const response = await fetch("https://cuddly-telegram-69945q6vw9j6h4gr-3001.app.github.dev/protected", {
 				method: "GET",
-				headers: { "Authorization": "Bearer" + `${JSON.parse(localStorage.getItem("access"))}` }
+				headers: { "Authorization": `Bearer ${access_key}` }
 			});
 			const data = await response.json();
-			authorizerUser = data.logged_in_as;
-			/* navigate(`/private`) */
+			const authorizerUser = data.logged_in_as;
+			navigate(`/private`)
         } catch (error) {
 			console.error(error);
 		}
-        /* const data = await response.json();
-		authorizerUser = data.logged_in_as;
-		navigate(`/private`) */
     }
 
 
