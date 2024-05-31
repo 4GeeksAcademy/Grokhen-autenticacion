@@ -8,10 +8,14 @@ const Private = () => {
 	const navigate = useNavigate();
 
 	const authentication = async () => {
-		const token = JSON.parse(localStorage.getItem("access"))
+		const token = JSON.parse(localStorage.getItem("token"))
 		const access_key = token.access_token
+		if (!access_key) {
+			navigate(`/login`)
+			return;
+		}
 		try {
-			const response = await fetch("https://cuddly-telegram-69945q6vw9j6h4gr-3001.app.github.dev/protected", {
+			const response = await fetch(`${process.env.BACKEND_URL}/protected`, {
 				method: "GET",
 				headers: { "Authorization": `Bearer ${access_key}` }
 			});
@@ -28,6 +32,7 @@ const Private = () => {
 			const authorizerUser = data.logged_in_as;
 		} catch (error) {
 			console.error(error);
+			navigate(`/login`)
 		}
 	}
 	useEffect(() => {

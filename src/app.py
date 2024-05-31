@@ -81,6 +81,7 @@ def add_user():
     new_user = User(
             email=data['email'], 
             password=data['password'], 
+            rol=data['rol'],
             is_active=data.get('is_active',True)
     )
 
@@ -110,6 +111,7 @@ def login():
     password = data['password']
 
     user = User.query.filter_by(email = email).first()
+    user_rol = user.rol
 
     if not user:
         raise APIException('User doesnt exist', status_code=400)
@@ -117,9 +119,13 @@ def login():
     if email != user.email or password != user.password:
         return jsonify({"msg": "Bad email or password"}), 401
     
-    expire_time = timedelta(seconds = 60)
-
-    access_token = create_access_token(identity=email, expires_delta = expire_time)
+    expire_time = timedelta(seconds = 60) #solo para pruebas de acceso, después hay que modificarlo
+    additional_claims = {
+        "rol": user_rol,
+        "user_id": user.id
+        }
+    
+    access_token = create_access_token(identity=email, expires_delta = expire_time, additional_claims=additional_claims)
     return jsonify(access_token=access_token)
 
 # Protect a route with jwt_required, which will kick out requests

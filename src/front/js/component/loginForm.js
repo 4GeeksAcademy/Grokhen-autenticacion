@@ -1,78 +1,68 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate, BrowserRouter, Link } from "react-router-dom";
 import { Context } from "../store/appContext";
 
+import { jwtDecode } from 'jwt-decode';
+
 const LoginForm = () => {
-	const { store, actions } = useContext(Context);
-	const navigate = useNavigate();
+    const { store, actions } = useContext(Context);
+    const navigate = useNavigate();
 
-	const [user, setUser] = useState({
-		"email": "",
-		"password": ""
-	})
+    const [user, setUser] = useState({
+        "email": "",
+        "password": ""
+    })
 
-	const login = async () => {
-		/* const store = setStore(); */
-		try {
-			const response = await fetch("https://cuddly-telegram-69945q6vw9j6h4gr-3001.app.github.dev/login", {
-				method: "POST",
-				body: JSON.stringify(user),
-				headers: { "Content-Type": "application/json" }
-			});
-			const userToken = await response.json();
-			localStorage.setItem("access", JSON.stringify(userToken));
-			authentication()
-		} catch (error) {
-			console.error(error);
-		}
-	}
-
-	const authentication = async () => {
-		const token = JSON.parse(localStorage.getItem("access"))
-		const access_key = token.access_token
-        try {
-            const response = await fetch("https://cuddly-telegram-69945q6vw9j6h4gr-3001.app.github.dev/protected", {
-				method: "GET",
-				headers: { "Authorization": `Bearer ${access_key}` }
-			});
-			const data = await response.json();
-			const authorizerUser = data.logged_in_as;
-			navigate(`/private`)
-        } catch (error) {
-			console.error(error);
-		}
+    const handleLogin = async () => {
+        await actions.login(user);
+        const access_token = JSON.parse(localStorage.getItem("token"))
+        const access_key = access_token.access_token
+        const decodedToken = jwtDecode(access_key);
+        const userId = decodedToken.user_id;
+        store.user_id = userId
+        const userRol = decodedToken.rol;
+        if (userRol === `admin`) {
+            navigate(`/admin`);
+        } else {
+            navigate(`/private`);
+        }
     }
 
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        try {
+            await handleLogin()
+        } catch (error) {
+            console.log('error', error)
+        }
+    }
 
-		return (
-			<>
-				<h1>Awesome Aplication</h1>
-				<form /* onSubmit={login} */>
-					<div className="row mb-3">
-						<label htmlFor="inputEmail3" className="col-sm-2 col-form-label">Email</label>
-						<div className="col-sm-10">
-							<input
-								onChange={(e) => { setUser({ ...user, email: e.target.value }) }}
-								type="email"
-								className="form-control"
-								id="inputEmail3" />
-						</div>
-					</div>
-					<div className="row mb-3">
-						<label htmlFor="inputPassword3" className="col-sm-2 col-form-label">Password</label>
-						<div className="col-sm-10">
-							<input
-								onChange={(e) => { setUser({ ...user, password: e.target.value }) }}
-								type="password"
-								className="form-control"
-								id="inputPassword3" />
-						</div>
-					</div>
-					{/* <button type="submit" className="btn btn-primary">Login</button> */}
-				</form>
-				<button onClick={login}>Login de verdad</button>
-			</>
-		)
-	}
+    return (
+                <div>
+                    <h2>Acceso</h2>
+                    <form onSubmit={handleSubmit}>
+                        <div>
+                            <label htmlFor="emailId" className="form-label d-none">Email</label>
+                            <input type="email"
+                                id="emailId"
+                                aria-describedby="emailHelp"
+                                onChange={(e) => { setUser({ ...user, email: e.target.value }) }}
+                                placeholder="Email" />
+                        </div>
+                        <div>
+                            <label htmlFor="passwordId" className="form-label d-none">Password</label>
+                            <input type="password"
+                                id="passwordId"
+                                onChange={(e) => { setUser({ ...user, password: e.target.value }) }}
+                                placeholder="Contraseña" />
+                        </div>
+                        <button type="submit" onClick={handleLogin}>Acceder <i className="fas fa-long-arrow-alt-right"></i></button>
+                        <Link to="/registro">
+                            <div>¿No eres usuario? Registrate</div>
+                        </Link>
+                    </form>
+                </div>
+    );
+};
 
-	export default LoginForm;
+export default LoginForm;
