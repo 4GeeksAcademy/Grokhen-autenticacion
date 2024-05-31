@@ -1,22 +1,44 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
+			token: JSON.parse(localStorage.getItem("token")) || {},
+			user_id:[],
 			message: null,
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
+			login: async (user) => {
+				try {
+					const response = await fetch(`${process.env.BACKEND_URL}/login`, {
+						method: "POST",
+						body: JSON.stringify(user),
+						headers: { "Content-Type": "application/json" }
+					});
+
+					if (!response.ok) {
+						Swal.fire({
+							title: "Error",
+							text: "Nombre de usuario o contraseña incorrectos",
+							icon: "error"
+						  });
+						throw new Error('Nombre de usuario o contraseña incorrectos');
+					}
+
+					const userToken = await response.json();
+					console.log(userToken);
+					localStorage.setItem("token", JSON.stringify(userToken));
+					setStore({ token: userToken })
+				} catch (error) {
+					console.error(error);
+				}
+			},
+
+			logout: () => {
+				localStorage.removeItem("token")
+				setStore(prevState => ({ ...prevState, token: {} }));
+				setStore(prevState => ({ ...prevState, user_id: [] }));
+			},
+
 			exampleFunction: () => {
 				getActions().changeColor(0, "green");
 			},
